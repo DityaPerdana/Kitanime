@@ -1,6 +1,47 @@
 const express = require('express');
 const router = express.Router();
 const animeApi = require('../services/animeApi');
+const axios = require('axios');
+
+// Health check for External API used by admin dashboard
+router.get('/anime/status', async (req, res) => {
+  try {
+    const baseUrl = await animeApi.getApiBaseUrl();
+    const url = `${baseUrl}/home`;
+    const response = await axios.get(url, {
+      timeout: 5000,
+      headers: { 'User-Agent': 'ArufaNime/1.0' }
+    });
+
+    if (response.data && (response.data.status === 'Ok' || response.data.data)) {
+      return res.json({ online: true });
+    }
+
+    return res.status(502).json({ online: false });
+  } catch (error) {
+    return res.status(502).json({ online: false });
+  }
+});
+
+// Root health endpoint for admin API connection test
+router.get('/', async (req, res) => {
+  try {
+    const baseUrl = await animeApi.getApiBaseUrl();
+    const url = `${baseUrl}/home`;
+    const response = await axios.get(url, {
+      timeout: 5000,
+      headers: { 'User-Agent': 'ArufaNime/1.0' }
+    });
+
+    if (response.data && (response.data.status === 'Ok' || response.data.data)) {
+      return res.json({ success: true });
+    }
+
+    return res.status(502).json({ success: false, error: 'Bad upstream response' });
+  } catch (error) {
+    return res.status(502).json({ success: false, error: 'Upstream unreachable' });
+  }
+});
 
 router.get('/anime/:slug', async (req, res) => {
   try {

@@ -86,7 +86,7 @@ async function insertDefaultData() {
         try {
           const hashedPassword = await bcrypt.hash('admin123', 10);
           db.run(`INSERT INTO admin_users (username, password_hash, email) VALUES
-            ('admin', ?, 'admin@kitanime.com')`, [hashedPassword]);
+            ('admin', ?, 'admin@arufanime.com')`, [hashedPassword]);
         } catch (error) {
           reject(error);
           return;
@@ -116,7 +116,7 @@ async function insertDefaultData() {
 
       if (row.count === 0) {
         db.run(`INSERT INTO settings (key, value, description) VALUES
-          ('site_title', 'KitaNime - Streaming Anime Subtitle Indonesia', 'Judul website'),
+          ('site_title', 'ArufaNime - Streaming Anime Subtitle Indonesia', 'Judul website'),
           ('site_description', 'Nonton anime subtitle Indonesia terlengkap dan terbaru', 'Deskripsi website'),
           ('cookie_consent_enabled', '1', 'Enable cookie consent popup'),
           ('adsense_enabled', '0', 'Enable Google AdSense')`);
@@ -222,7 +222,7 @@ const dbHelpers = {
 
   getSetting: (key) => {
     return new Promise((resolve, reject) => {
-      db.get("SELECT value FROM settings WHERE key = ?", [key], (err, row) => {
+      db.get("SELECT value FROM settings WHERE key = ? LIMIT 1", [key], (err, row) => {
         if (err) reject(err);
         else resolve(row ? row.value : null);
       });
@@ -231,17 +231,17 @@ const dbHelpers = {
 
   updateSetting: (key, value) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?",
-        [value, key], function(err) {
-        if (err) reject(err);
-        else resolve(this.changes);
-      });
+      db.run(`INSERT INTO settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
+        [key, value], function(err) {
+          if (err) reject(err);
+          else resolve(this.changes || this.lastID);
+        });
     });
   }
 };
 
 module.exports = {
-  db,
   initializeDatabase,
   ...dbHelpers
 };

@@ -27,7 +27,7 @@ router.get('/login', (req, res) => {
   }
 
   res.render('admin/login', {
-    title: 'Admin Login - KitaNime',
+    title: 'Admin Login - ArufaNime',
     layout: 'admin/layout',
     error: req.query.error
   });
@@ -81,7 +81,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
 
     res.render('admin/dashboard', {
-      title: 'Admin Dashboard - KitaNime',
+      title: 'Admin Dashboard - ArufaNime',
       layout: 'admin/layout',
       user: req.session.adminUser,
       stats: {
@@ -94,7 +94,7 @@ router.get('/', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Admin dashboard error:', error);
     res.render('admin/error', {
-      title: 'Error - Admin KitaNime',
+      title: 'Error - Admin ArufaNime',
       layout: 'admin/layout',
       error: 'Tidak dapat memuat dashboard'
     });
@@ -106,7 +106,7 @@ router.get('/api-endpoints', requireAuth, async (req, res) => {
     const endpoints = await getAllApiEndpoints();
 
     res.render('admin/api-endpoints', {
-      title: 'Kelola API Endpoints - Admin KitaNime',
+      title: 'Kelola API Endpoints - Admin ArufaNime',
       layout: 'admin/layout',
       user: req.session.adminUser,
       endpoints,
@@ -115,7 +115,7 @@ router.get('/api-endpoints', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('API endpoints page error:', error);
     res.render('admin/error', {
-      title: 'Error - Admin KitaNime',
+      title: 'Error - Admin ArufaNime',
       layout: 'admin/layout',
       error: 'Tidak dapat memuat data API endpoints'
     });
@@ -141,7 +141,7 @@ router.get('/ad-slots', requireAuth, async (req, res) => {
     const adSlots = await getAllAdSlots();
 
     res.render('admin/ad-slots', {
-      title: 'Kelola Slot Iklan - Admin KitaNime',
+      title: 'Kelola Slot Iklan - Admin ArufaNime',
       layout: 'admin/layout',
       user: req.session.adminUser,
       adSlots,
@@ -150,7 +150,7 @@ router.get('/ad-slots', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Ad slots page error:', error);
     res.render('admin/error', {
-      title: 'Error - Admin KitaNime',
+      title: 'Error - Admin ArufaNime',
       layout: 'admin/layout',
       error: 'Tidak dapat memuat data slot iklan'
     });
@@ -199,29 +199,33 @@ router.delete('/ad-slots/:id', requireAuth, async (req, res) => {
 
 router.get('/settings', requireAuth, async (req, res) => {
   try {
-    const [siteTitle, siteDescription, cookieConsentEnabled, adsenseEnabled] = await Promise.all([
+    const [siteTitle, siteDescription, cookieConsentEnabled, adsenseEnabled, maintenanceMode, maintenanceMessage] = await Promise.all([
       getSetting('site_title'),
       getSetting('site_description'),
       getSetting('cookie_consent_enabled'),
-      getSetting('adsense_enabled')
+      getSetting('adsense_enabled'),
+      getSetting('maintenance_mode'),
+      getSetting('maintenance_message')
     ]);
 
     res.render('admin/settings', {
-      title: 'Pengaturan - Admin KitaNime',
+      title: 'Pengaturan - Admin ArufaNime',
       layout: 'admin/layout',
       user: req.session.adminUser,
       settings: {
         site_title: siteTitle,
         site_description: siteDescription,
         cookie_consent_enabled: cookieConsentEnabled === '1',
-        adsense_enabled: adsenseEnabled === '1'
+        adsense_enabled: adsenseEnabled === '1',
+        maintenance_mode: maintenanceMode === '1',
+        maintenance_message: maintenanceMessage || ''
       },
       req: req
     });
   } catch (error) {
     console.error('Settings page error:', error);
     res.render('admin/error', {
-      title: 'Error - Admin KitaNime',
+      title: 'Error - Admin ArufaNime',
       layout: 'admin/layout',
       error: 'Tidak dapat memuat pengaturan'
     });
@@ -230,13 +234,15 @@ router.get('/settings', requireAuth, async (req, res) => {
 
 router.post('/settings', requireAuth, async (req, res) => {
   try {
-    const { site_title, site_description, cookie_consent_enabled, adsense_enabled } = req.body;
+    const { site_title, site_description, cookie_consent_enabled, adsense_enabled, maintenance_mode, maintenance_message } = req.body;
 
     await Promise.all([
       updateSetting('site_title', site_title),
       updateSetting('site_description', site_description),
       updateSetting('cookie_consent_enabled', cookie_consent_enabled === 'on' ? '1' : '0'),
-      updateSetting('adsense_enabled', adsense_enabled === 'on' ? '1' : '0')
+      updateSetting('adsense_enabled', adsense_enabled === 'on' ? '1' : '0'),
+      updateSetting('maintenance_mode', maintenance_mode === 'on' ? '1' : '0'),
+      updateSetting('maintenance_message', maintenance_message || '')
     ]);
 
     res.redirect('/admin/settings?success=updated');
@@ -248,7 +254,7 @@ router.post('/settings', requireAuth, async (req, res) => {
 
 router.get('/preview', requireAuth, (req, res) => {
   res.render('admin/preview', {
-    title: 'Preview Website - Admin KitaNime',
+    title: 'Preview Website - Admin ArufaNime',
     layout: 'admin/layout',
     user: req.session.adminUser
   });

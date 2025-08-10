@@ -5,12 +5,12 @@ block content
     div(class="grid grid-cols-1 lg:grid-cols-4 gap-8")
       div(class="lg:col-span-3")
         nav(class="mb-4")
-          ol(class="flex items-center space-x-2 text-sm text-gray-500")
-            li: a(href="/" class="hover:text-primary-600") Beranda
+          ol(class="flex items-center space-x-2 text-sm text-white")
+            li: a(href="/" class="hover:underline decoration-primary-600/70") Beranda
             li: span /
-            li: a(href=`/anime/${anime.slug}` class="hover:text-primary-600")= anime.title
+            li: a(href=`/anime/${anime.slug}` class="hover:underline decoration-primary-600/70")= anime.title
             li: span /
-            li(class="text-gray-900 font-medium") Episode #{episode.number}
+            li(class="text-white font-medium") Episode #{episode.number}
 
         div(class="bg-black rounded-lg overflow-hidden mb-6 relative")
           div(class="aspect-video")
@@ -34,30 +34,30 @@ block content
               
               p(class="text-white text-center p-4") Browser Anda tidak mendukung video player.
 
-        div(class="bg-white rounded-lg shadow-sm p-6 mb-6")
+        div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-6 mb-6")
           div
             label(for="autonexteps" class="inline-flex items-center cursor-pointer select-none relative")
-              input(id="autonexteps" type="checkbox" class="peer relative h-5 w-5 appearance-none rounded-md border border-gray-300 bg-white transition-colors checked:bg-primary-600 checked:border-primary-600 focus:ring-2 focus:ring-primary-300")
-              span(class="ml-2 text-gray-800") Auto Next Episode
-              svg(class="pointer-events-none absolute w-5 h-5 text-white hidden peer-checked:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="left: 0; top: 0;")
+              input(id="autonexteps" type="checkbox" class="peer relative h-5 w-5 appearance-none rounded-md border border-neutral-700 bg-neutral-900 transition-colors checked:bg-primary-600 checked:border-primary-600 focus:ring-2 focus:ring-primary-300")
+              span(class="ml-2 text-white") Auto Next Episode
+              svg(class="pointer-events-none absolute w-5 h-5 text-neutral-100 hidden peer-checked:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="left: 0; top: 0;")
                 polyline(points="20 6 9 17 4 12")
             
 
-        div(class="bg-white rounded-lg shadow-sm p-6 mb-6")
+        div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-6 mb-6")
           div(class="flex items-center justify-between")
             div
               if navigation.prev && navigation.prev < navigation.all_episodes.length && navigation.prev > 1
-                a(href=`/anime/${anime.slug}/episode/${navigation.prev}` class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors")
+                a(href=`/anime/${anime.slug}/episode/${navigation.prev}` class="inline-flex items-center px-4 py-2 bg-neutral-800 text-white border border-neutral-700 rounded-lg hover:bg-neutral-700 transition-colors")
                   svg(class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                     path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
                   span Prev
               else
-                div(class="text-gray-400") First
+                div(class="text-white/60") First
             
             div(class="text-center")
-              span(class="text-sm text-gray-500") #{episode.number}
+              span(class="text-sm text-white") #{episode.number}
               if navigation.all_episodes && navigation.all_episodes.length > 0
-                span(class="text-sm text-gray-500") /#{navigation.all_episodes.length}
+                span(class="text-sm text-white") /#{navigation.all_episodes.length}
             
             div
               if navigation.next || navigation.next < navigation.all_episodes.length
@@ -66,15 +66,15 @@ block content
                   svg(class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                     path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
               else
-                div(class="text-gray-400") Next
+                div(class="text-white/60") Next
 
         if episode.download_links && (episode.download_links.mp4 || episode.download_links.mkv)
-          div(class="bg-white rounded-lg shadow-sm mb-6")
-            button(onclick="toggleDownloads()" class="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors")
+          div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm mb-6")
+            button(onclick="toggleDownloads()" class="w-full p-4 flex items-center justify-between text-left hover:bg-neutral-800 transition-colors")
               div(class="flex items-center")
                 svg(class="w-5 h-5 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                   path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
-                h3(class="font-bold text-gray-900") Download Episode
+                h3(class="font-bold text-white") Download Episode
                 - var totalLinks = 0
                 if episode.download_links.mp4
                   each resolution in episode.download_links.mp4
@@ -82,20 +82,20 @@ block content
                 if episode.download_links.mkv
                   each resolution in episode.download_links.mkv
                     - totalLinks += resolution.urls.length
-                span(class="ml-2 text-sm text-gray-500")= `(${totalLinks} links)`
-              svg(id="downloadChevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                span(class="ml-2 text-sm text-white/70")= `(${totalLinks} links)`
+              svg(id="downloadChevron" class="w-5 h-5 text-white transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7")
             
-            div(id="downloadContent" class="hidden border-t border-gray-200")
-              div(class="flex border-b border-gray-200")
+            div(id="downloadContent" class="hidden border-t border-neutral-800")
+              div(class="flex border-b border-neutral-800")
                 if episode.download_links.mp4 && episode.download_links.mp4.length > 0
-                  button(onclick="switchFormat('mp4')" id="mp4Tab" class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 border-transparent hover:text-primary-600 hover:border-primary-300 transition-colors")
+                  button(onclick="switchFormat('mp4')" id="mp4Tab" class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 border-transparent hover:text-primary-400 hover:border-primary-400 transition-colors text-white")
                     span(class="flex items-center justify-center")
                       svg(class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                         path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2")
                       span MP4
                 if episode.download_links.mkv && episode.download_links.mkv.length > 0
-                  button(onclick="switchFormat('mkv')" id="mkvTab" class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 border-transparent hover:text-primary-600 hover:border-primary-300 transition-colors")
+                  button(onclick="switchFormat('mkv')" id="mkvTab" class="flex-1 px-4 py-3 text-sm font-medium text-center border-b-2 border-transparent hover:text-primary-400 hover:border-primary-400 transition-colors text-white")
                     span(class="flex items-center justify-center")
                       svg(class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                         path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2")
@@ -106,11 +106,11 @@ block content
                   each resolution in episode.download_links.mp4
                     div(class="mb-4 last:mb-0")
                       div(class="flex items-center justify-between mb-2")
-                        span(class="text-sm font-medium text-gray-700 bg-blue-50 px-2 py-1 rounded")= resolution.resolution
-                        span(class="text-xs text-gray-500")= `${resolution.urls.length} providers`
+                        span(class="text-sm font-medium text-white bg-neutral-800 border border-neutral-700 px-2 py-1 rounded")= resolution.resolution
+                        span(class="text-xs text-white/70")= `${resolution.urls.length} providers`
                       div(class="grid grid-cols-2 sm:grid-cols-3 gap-2")
                         each provider in resolution.urls
-                          a(href=provider.url target="_blank" rel="noopener noreferrer" class="flex items-center justify-center p-2 text-xs border border-gray-200 rounded hover:border-primary-300 hover:bg-primary-50 transition-colors")
+                          a(href=provider.url target="_blank" rel="noopener noreferrer" class="flex items-center justify-center p-2 text-xs border border-neutral-700 rounded hover:border-primary-500 hover:bg-neutral-800 transition-colors text-white")
                             svg(class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3")
                             span(class="truncate")= provider.provider
@@ -120,11 +120,11 @@ block content
                   each resolution in episode.download_links.mkv
                     div(class="mb-4 last:mb-0")
                       div(class="flex items-center justify-between mb-2")
-                        span(class="text-sm font-medium text-gray-700 bg-green-50 px-2 py-1 rounded")= resolution.resolution
-                        span(class="text-xs text-gray-500")= `${resolution.urls.length} providers`
+                        span(class="text-sm font-medium text-white bg-neutral-800 border border-neutral-700 px-2 py-1 rounded")= resolution.resolution
+                        span(class="text-xs text-white/70")= `${resolution.urls.length} providers`
                       div(class="grid grid-cols-2 sm:grid-cols-3 gap-2")
                         each provider in resolution.urls
-                          a(href=provider.url target="_blank" rel="noopener noreferrer" class="flex items-center justify-center p-2 text-xs border border-gray-200 rounded hover:border-primary-300 hover:bg-primary-50 transition-colors")
+                          a(href=provider.url target="_blank" rel="noopener noreferrer" class="flex items-center justify-center p-2 text-xs border border-neutral-700 rounded hover:border-primary-500 hover:bg-neutral-800 transition-colors text-white")
                             svg(class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3")
                             span(class="truncate")= provider.provider
@@ -132,26 +132,26 @@ block content
         if adSlots && adSlots.playerBottom && adSlots.playerBottom.length > 0
           div(class="mb-6")
             each ad in adSlots.playerBottom
-              div(class="ad-slot bg-gray-100 rounded-lg")!= ad.content
+              div(class="ad-slot bg-neutral-900 border border-neutral-800 rounded-lg text-white")!= ad.content
 
       div(class="lg:col-span-1")
         if adSlots && adSlots.sidebarTop && adSlots.sidebarTop.length > 0
           div(class="mb-6")
             each ad in adSlots.sidebarTop
-              div(class="ad-slot bg-gray-100 rounded-lg")!= ad.content
+              div(class="ad-slot bg-neutral-900 border border-neutral-800 rounded-lg text-white")!= ad.content
 
-        div(class="bg-white rounded-lg shadow-sm p-6 mb-6")
+        div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-6 mb-6")
           a(href=`/anime/${anime.slug}`)
             img(src=anime.poster alt=anime.title class="w-full rounded-lg mb-3" onerror="this.onerror=null;this.src='https://placehold.co/400x600?text=No+Image';")
-          h3(class="font-bold text-gray-900 mb-2")
-            a(href=`/anime/${anime.slug}` class="hover:text-primary-600")= anime.title
+          h3(class="font-bold text-white mb-2")
+            a(href=`/anime/${anime.slug}` class="hover:underline decoration-primary-600/70")= anime.title
           if anime.synopsis
-            p(class="text-sm text-gray-600 line-clamp-3")= anime.synopsis
+            p(class="text-sm text-white/80 line-clamp-3")= anime.synopsis
           div(class="mt-3")
-            a(href=`/anime/${anime.slug}` class="text-primary-600 text-sm hover:text-primary-700") Lihat Detail Anime
+            a(href=`/anime/${anime.slug}` class="text-white text-sm underline decoration-primary-600/60 hover:decoration-primary-600") Lihat Detail Anime
 
-        div(class="bg-white rounded-lg shadow-sm p-6 mb-6")
-          h3(class="font-bold text-gray-900 mb-4") Bagikan Episode
+        div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-6 mb-6")
+          h3(class="font-bold text-white mb-4") Bagikan Episode
           div(class="space-y-2")
             button(onclick=`shareEpisode('facebook')` class="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors") Facebook
             button(onclick=`shareEpisode('twitter')` class="w-full bg-sky-500 text-white py-2 px-3 rounded text-sm hover:bg-sky-600 transition-colors") Twitter
@@ -160,7 +160,7 @@ block content
         if adSlots && adSlots.sidebarBottom && adSlots.sidebarBottom.length > 0
           div(class="mb-6")
             each ad in adSlots.sidebarBottom
-              div(class="ad-slot bg-gray-100 rounded-lg")!= ad.content
+              div(class="ad-slot bg-neutral-900 border border-neutral-800 rounded-lg text-white")!= ad.content
 
 block scripts
   script.
@@ -309,15 +309,15 @@ block scripts
     });
     function showVideoError() {
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-white text-center p-4 z-10';
+      errorDiv.className = 'absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-neutral-100 text-center p-4 z-10';
       errorDiv.innerHTML = `
         <div>
           <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
           <h3 class="text-lg font-semibold mb-2">Video Tidak Dapat Dimuat</h3>
-          <p class="text-sm text-gray-300 mb-4">Terjadi kesalahan saat memuat video. Ini mungkin karena:</p>
-          <ul class="text-xs text-gray-400 text-left max-w-md mx-auto space-y-1">
+          <p class="text-sm text-white/80 mb-4">Terjadi kesalahan saat memuat video. Ini mungkin karena:</p>
+          <ul class="text-xs text-white/70 text-left max-w-md mx-auto space-y-1">
             <li>• Server video sedang bermasalah</li>
             <li>• Link video sudah tidak valid</li>
             <li>• Masalah koneksi internet</li>
@@ -359,30 +359,30 @@ block scripts
       
       if (mp4Tab) {
         mp4Tab.classList.remove('text-primary-600', 'border-primary-600');
-        mp4Tab.classList.add('text-gray-500', 'border-transparent');
+        mp4Tab.classList.add('text-white/70', 'border-transparent');
       }
       if (mkvTab) {
         mkvTab.classList.remove('text-primary-600', 'border-primary-600');
-        mkvTab.classList.add('text-gray-500', 'border-transparent');
+        mkvTab.classList.add('text-white/70', 'border-transparent');
       }
       
       if (mp4Content) mp4Content.classList.add('hidden');
       if (mkvContent) mkvContent.classList.add('hidden');
       
       if (format === 'mp4' && mp4Tab && mp4Content) {
-        mp4Tab.classList.remove('text-gray-500', 'border-transparent');
-        mp4Tab.classList.add('text-primary-600', 'border-primary-600');
+        mp4Tab.classList.remove('text-white/70', 'border-transparent');
+        mp4Tab.classList.add('text-primary-400', 'border-primary-400');
         mp4Content.classList.remove('hidden');
       } else if (format === 'mkv' && mkvTab && mkvContent) {
-        mkvTab.classList.remove('text-gray-500', 'border-transparent');
-        mkvTab.classList.add('text-primary-600', 'border-primary-600');
+        mkvTab.classList.remove('text-white/70', 'border-transparent');
+        mkvTab.classList.add('text-primary-400', 'border-primary-400');
         mkvContent.classList.remove('hidden');
       }
     }
 
     function shareEpisode(platform) {
       const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent(`Nonton ${anime.title} Episode ${episode.number} di KitaNime`);
+      const text = encodeURIComponent(`Nonton ${anime.title} Episode ${episode.number} di ArufaNime`);
       
       switch(platform) {
         case 'facebook':

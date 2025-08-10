@@ -18,14 +18,14 @@ class AnimeApiService {
       try {
         const endpointData = await fs.readFile(this.fallbackEndpointsPath, 'utf8');
         const endpoints = JSON.parse(endpointData);
-        return endpoints.base_url || 'http://https://5fhp32db-3000.asse.devtunnels.ms/v1';
+        return endpoints.base_url || 'http://localhost:3000/v1';
       } catch (error) {
         console.warn('Could not read endpoint.json, using default URL');
-        return 'http://https://5fhp32db-3000.asse.devtunnels.ms/v1';
+        return 'http://localhost:3000/v1';
       }
     } catch (error) {
       console.error('Error getting API base URL:', error);
-      return 'http://https://5fhp32db-3000.asse.devtunnels.ms/v1';
+      return 'http://localhost:3000/v1';
     }
   }
 
@@ -43,7 +43,7 @@ class AnimeApiService {
         params,
         timeout: 10000,
         headers: {
-          'User-Agent': 'KitaNime/1.0'
+          'User-Agent': 'ArufaNime/1.0'
         }
       });
 

@@ -15,6 +15,7 @@ const apiRoutes = require('./routes/api');
 
 const cookieConsent = require('./middleware/cookieConsent');
 const adSlots = require('./middleware/adSlots');
+const maintenance = require('./middleware/maintenance');
 
 const { initializeDatabase } = require('./models/database');
 
@@ -124,7 +125,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'kitanime-secret-key-change-in-production',
+  secret: process.env.SESSION_SECRET || 'arufanime-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -138,6 +139,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieConsent);
 app.use(adSlots);
+app.use(maintenance);
 
 app.use('/', indexRoutes);
 app.use('/anime', animeRoutes);
@@ -146,7 +148,7 @@ app.use('/api', apiRoutes);
 
 app.use((req, res) => {
   res.status(404).render('error', {
-    title: 'Halaman Tidak Ditemukan - KitaNime',
+    title: 'Halaman Tidak Ditemukan - ArufaNime',
     error: {
       status: 404,
       message: 'Halaman yang Anda cari tidak ditemukan'
@@ -157,7 +159,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).render('error', {
-    title: 'Terjadi Kesalahan - KitaNime',
+    title: 'Terjadi Kesalahan - ArufaNime',
     error: {
       status: err.status || 500,
       message: process.env.NODE_ENV === 'production' ? 
@@ -172,7 +174,7 @@ async function startServer() {
     console.log('Database initialized successfully');
     
     app.listen(PORT, () => {
-      console.log(`KitaNime server running on port ${PORT}`);
+      console.log(`ArufaNime server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {

@@ -11,14 +11,14 @@ block content
         if animeList && animeList.length > 0
           div(class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8")
             each anime in animeList
-              div(class="anime-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md")
+              div(class="anime-card bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm overflow-hidden hover:shadow-md")
                 a(href=`/anime/${anime.slug}`)
                   div(class="relative")
                     img(src=anime.poster alt=anime.title class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=No+Image';")
                     if anime.current_episode
-                      div(class="absolute top-2 left-2 bg-primary-600 text-white text-xs px-2 py-1 rounded")= anime.current_episode
+                      div(class="absolute top-2 left-2 bg-primary-600 text-neutral-100 text-xs px-2 py-1 rounded")= anime.current_episode
                     if anime.newest_release_date
-                      div(class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded")= anime.newest_release_date
+                      div(class="absolute top-2 right-2 bg-black bg-opacity-70 text-neutral-100 text-xs px-2 py-1 rounded")= anime.newest_release_date
                   div(class="p-3")
                     h3(class="font-medium text-sm text-gray-900 line-clamp-2 mb-1")= anime.title
                     if anime.release_day
@@ -32,7 +32,7 @@ block content
                 
                 each page in Array.from({length: Math.min(5, pagination.last_visible_page)}, (_, i) => {const start = Math.max(1, pagination.current_page - 2);return start + i;}).filter(p => p <= pagination.last_visible_page)
                   if page === pagination.current_page
-                    span(class="px-3 py-2 bg-primary-600 text-white rounded")= page
+                    span(class="px-3 py-2 bg-primary-600 text-neutral-100 rounded")= page
                   else
                     a(href=`/ongoing?page=${page}` class="px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors")= page
                 
@@ -57,7 +57,7 @@ block content
             each ad in adSlots.sidebarTop
               div(class="ad-slot bg-gray-100 rounded-lg")!= ad.content
 
-        div(class="bg-white rounded-lg shadow-sm p-6 mb-6")
+        div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-6 mb-6")
           h3(class="font-bold text-gray-900 mb-4") Menu Cepat
           div(class="space-y-3")
             a(href="/" class="flex items-center text-gray-600 hover:text-primary-600 transition-colors")
