@@ -10,16 +10,18 @@ class AnimeApiService {
   }
   async getApiBaseUrl() {
     try {
-      // 1) Highest priority: ENV overrides
+      // 1) ENV override first
       const envUrl = process.env.EXTERNAL_API_BASE_URL || process.env.API_BASE_URL;
-      if (envUrl) {
-        return envUrl;
-      }
+      if (envUrl) return envUrl;
 
-      // 2) DB value if not localhost
+      // 2) DB value — allow localhost in non-production (or if explicitly allowed)
       const dbUrl = await getActiveApiEndpoint();
-      if (dbUrl && !/^(http:\/\/)?(localhost|127\.0\.0\.1)(:|\/|$)/i.test(dbUrl)) {
-        return dbUrl;
+      if (dbUrl) {
+        const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?(\/|$)/i.test(dbUrl);
+        const allowLocal = process.env.ALLOW_LOCAL_API === '1' || process.env.NODE_ENV !== 'production';
+        if (!isLocal || allowLocal) {
+          return dbUrl;
+        }
       }
 
       // 3) Fallback file
@@ -27,11 +29,11 @@ class AnimeApiService {
         const endpointData = await fs.readFile(this.fallbackEndpointsPath, 'utf8');
         const endpoints = JSON.parse(endpointData);
         if (endpoints.base_url) return endpoints.base_url;
-      } catch (error) {
-        console.warn('Could not read endpoint.json, using default URL');
+      } catch {
+        // ignore
       }
 
-      // 4) Safe default (public API)
+      // 4) Public default
       return 'https://arufanime-apis.vercel.app/v1';
     } catch (error) {
       console.error('Error getting API base URL:', error);
@@ -43,7 +45,7 @@ class AnimeApiService {
     try {
       const baseUrl = await this.getApiBaseUrl();
       const isAsset = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map)$/i.test(endpoint);
-      if (isAsset) throw new Error('Skip asset proxy');
+      if (isAsset) throw Object.assign(new Error('Skip asset proxy'), { skip: true });
 
       let url = `${baseUrl}${endpoint}`;
       if (endpoint == '/ongoing-anime') {
@@ -61,14 +63,17 @@ class AnimeApiService {
           return response.data;
         }
         return response.data.data;
-      } else {
-        throw new Error('Invalid API response format');
       }
+      throw new Error('Invalid API response format');
     } catch (error) {
-      // Hanya fallback ke mock untuk endpoint API yang dikenali
-      const known = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres/, /^\/search\//, /^\/anime\//, /^\/episode\//, /^\/movies\//];
-      const isKnown = known.some(r => r.test(endpoint));
+      // Respect 404: jangan fallback ke mock untuk detail endpoints
+      const status = error?.response?.status;
+      const isKnown = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//, /^\/anime\//, /^\/episode\//].some(r => r.test(endpoint));
+      const allowMock = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//].some(r => r.test(endpoint));
+      if (error?.skip) return null;
+      if (status === 404) return null;
       if (!isKnown) return null;
+      if (!allowMock) return null; // Jangan mock untuk /anime/* dan /episode/*
       return await this.loadMockData(endpoint, params);
     }
   }
