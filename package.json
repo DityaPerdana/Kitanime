@@ -2,7 +2,7 @@
   "name": "kitanime-root",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": { "node": "18.x" },
   "scripts": {
     "build": "echo 'no build'"
   },
