@@ -7,7 +7,7 @@ const axios = require('axios');
 router.get('/anime/status', async (req, res) => {
   try {
     const baseUrl = await animeApi.getApiBaseUrl();
-    const url = `${baseUrl}/home`;
+    const url = baseUrl.replace(/\/$/, '') + '/';
     const response = await axios.get(url, {
       timeout: 5000,
       headers: { 'User-Agent': 'ArufaNime/1.0' }
@@ -27,7 +27,7 @@ router.get('/anime/status', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const baseUrl = await animeApi.getApiBaseUrl();
-    const url = `${baseUrl}/home`;
+    const url = baseUrl.replace(/\/$/, '') + '/';
     const response = await axios.get(url, {
       timeout: 5000,
       headers: { 'User-Agent': 'ArufaNime/1.0' }

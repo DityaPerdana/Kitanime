@@ -10,22 +10,32 @@ class AnimeApiService {
   }
   async getApiBaseUrl() {
     try {
+      // 1) Highest priority: ENV overrides
+      const envUrl = process.env.EXTERNAL_API_BASE_URL || process.env.API_BASE_URL;
+      if (envUrl) {
+        return envUrl;
+      }
+
+      // 2) DB value if not localhost
       const dbUrl = await getActiveApiEndpoint();
-      console.log(dbUrl);
-      if (dbUrl) {
+      if (dbUrl && !/^(http:\/\/)?(localhost|127\.0\.0\.1)(:|\/|$)/i.test(dbUrl)) {
         return dbUrl;
       }
+
+      // 3) Fallback file
       try {
         const endpointData = await fs.readFile(this.fallbackEndpointsPath, 'utf8');
         const endpoints = JSON.parse(endpointData);
-        return endpoints.base_url || 'http://localhost:3000/v1';
+        if (endpoints.base_url) return endpoints.base_url;
       } catch (error) {
         console.warn('Could not read endpoint.json, using default URL');
-        return 'http://localhost:3000/v1';
       }
+
+      // 4) Safe default (public API)
+      return 'https://arufanime-apis.vercel.app/v1';
     } catch (error) {
       console.error('Error getting API base URL:', error);
-      return 'http://localhost:3000/v1';
+      return 'https://arufanime-apis.vercel.app/v1';
     }
   }
 

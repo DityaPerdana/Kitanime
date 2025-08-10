@@ -1,5 +1,5 @@
 {
-  "base_url": "http://localhost:3000/v1",
+  "base_url": "https://arufanime-apis.vercel.app/v1",
   "endpoints": {
     "home": "/home",
     "ongoing_anime": "/ongoing-anime",
