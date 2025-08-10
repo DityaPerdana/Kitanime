@@ -3,7 +3,6 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import routes from './routes/routes.js';
-import { getCurrentBase } from './src/lib/mirrorClient.js';
 
 // Set axios defaults for all scrapers
 axios.defaults.timeout = 15000;
@@ -29,14 +28,6 @@ app.use((req, _res, next) => {
     req.url = req.url.replace(/^\/api/, '');
   }
   next();
-});
-
-app.get('/v1/upstream', (_req, res) => {
-  try {
-    res.json({ status: 'Ok', base: getCurrentBase() });
-  } catch (e) {
-    res.status(500).json({ status: 'Error', message: 'Cannot get current base' });
-  }
 });
 
 app.use(routes);
