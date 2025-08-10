@@ -42,23 +42,22 @@ class AnimeApiService {
   async makeRequest(endpoint, params = {}) {
     try {
       const baseUrl = await this.getApiBaseUrl();
+      const isAsset = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map)$/i.test(endpoint);
+      if (isAsset) throw new Error('Skip asset proxy');
+
       let url = `${baseUrl}${endpoint}`;
-      if(endpoint == '/ongoing-anime'){
+      if (endpoint == '/ongoing-anime') {
         url = `${baseUrl}/ongoing-anime/${params.page}`;
       }
-      
-      console.log(`Making API request to: ${url}`);
-      
+
       const response = await axios.get(url, {
         params,
         timeout: 10000,
-        headers: {
-          'User-Agent': 'ArufaNime/1.0'
-        }
+        headers: { 'User-Agent': 'ArufaNime/1.0' }
       });
 
       if (response.data && response.data.status === 'Ok') {
-        if(endpoint === '/ongoing-anime' || endpoint.includes('/complete-anime') || endpoint.includes('/search') || endpoint.includes('/movies') || response.data.anime && response.data.pagination) {
+        if (endpoint === '/ongoing-anime' || endpoint.includes('/complete-anime') || endpoint.includes('/search') || endpoint.includes('/movies') || (response.data.anime && response.data.pagination)) {
           return response.data;
         }
         return response.data.data;
@@ -66,8 +65,10 @@ class AnimeApiService {
         throw new Error('Invalid API response format');
       }
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error.message);
-      
+      // Hanya fallback ke mock untuk endpoint API yang dikenali
+      const known = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres/, /^\/search\//, /^\/anime\//, /^\/episode\//, /^\/movies\//];
+      const isKnown = known.some(r => r.test(endpoint));
+      if (!isKnown) return null;
       return await this.loadMockData(endpoint, params);
     }
   }
@@ -75,7 +76,7 @@ class AnimeApiService {
   async loadMockData(endpoint, params = {}) {
     try {
       let filename;
-      
+
       switch (endpoint) {
         case '/home':
           filename = 'v1_home.json';
@@ -107,7 +108,7 @@ class AnimeApiService {
       const mockDataPath = path.join(this.apiResponsesPath, filename);
       const mockData = await fs.readFile(mockDataPath, 'utf8');
       const parsedData = JSON.parse(mockData);
-      
+
       console.log(`Using mock data from: ${filename}`);
       return parsedData.data || parsedData;
     } catch (error) {

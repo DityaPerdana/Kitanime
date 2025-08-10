@@ -3,6 +3,15 @@ const router = express.Router();
 const axios = require('axios');
 const animeApi = require('../services/animeApi');
 
+// Guard: abaikan request yang terlihat seperti file asset (jpg/png/js/css) di bawah /anime
+router.use((req, res, next) => {
+  const last = req.path.split('/').pop() || '';
+  if (/\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map)$/i.test(last)) {
+    return res.status(404).send('Not Found');
+  }
+  next();
+});
+
 router.get('/:slug', async (req, res) => {
   try {
     const slug = req.params.slug;

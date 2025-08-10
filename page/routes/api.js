@@ -13,9 +13,13 @@ router.get('/anime/status', async (req, res) => {
       headers: { 'User-Agent': 'ArufaNime/1.0' }
     });
 
-    if (response.data && (response.data.status === 'Ok' || response.data.data)) {
-      return res.json({ online: true });
-    }
+    const isUp = !!response.data && (
+      (typeof response.data.status === 'string' && response.data.status.toLowerCase() === 'ok') ||
+      response.data.data !== undefined ||
+      response.data.message !== undefined
+    );
+
+    if (isUp) return res.json({ online: true });
 
     return res.status(502).json({ online: false });
   } catch (error) {
@@ -33,9 +37,13 @@ router.get('/', async (req, res) => {
       headers: { 'User-Agent': 'ArufaNime/1.0' }
     });
 
-    if (response.data && (response.data.status === 'Ok' || response.data.data)) {
-      return res.json({ success: true });
-    }
+    const isUp = !!response.data && (
+      (typeof response.data.status === 'string' && response.data.status.toLowerCase() === 'ok') ||
+      response.data.data !== undefined ||
+      response.data.message !== undefined
+    );
+
+    if (isUp) return res.json({ success: true });
 
     return res.status(502).json({ success: false, error: 'Bad upstream response' });
   } catch (error) {
