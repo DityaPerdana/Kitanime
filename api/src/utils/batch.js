@@ -1,18 +1,21 @@
-import axios from 'axios';
+import { load } from 'cheerio';
 import getBatch from '../lib/getBatch.js';
-import scrapeBatch from '../lib/scrapeBatch.js';
-const BASEURL = process.env.BASEURL   || 'https://otakudesu.best';
+import { fetchPath } from '../lib/mirrorClient.js';
 const batch = async ({ batchSlug, animeSlug }) => {
-    let batch = batchSlug;
+    let slug = '';
+    if (batchSlug) slug = batchSlug;
+
     if (animeSlug) {
-        const response = await axios.get(`${BASEURL}/anime/${animeSlug}`);
-        const batchData = getBatch(response.data);
-        batch = batchData?.slug;
+        const html = await fetchPath(`/anime/${animeSlug}`);
+        const $ = load(html);
+        const href = $('#batchLink').attr('href');
+        slug = href ? href.split('/batch/').join('') : '';
     }
-    if (!batch)
-        return false;
-    const response = await axios.get(`${BASEURL}/batch/${batch}`);
-    const result = scrapeBatch(response.data);
-    return result;
+
+    if (!slug) return undefined;
+
+    const html = await fetchPath(`/batch/${slug}`);
+    const batchList = getBatch(html);
+    return batchList;
 };
 export default batch;

@@ -1,10 +1,10 @@
-import axios from 'axios';
 import 'dotenv/config';
 import scrapeGenreLists from '../lib/scrapeGenreLists.js';
-const BASEURL = process.env.BASEURL   || 'https://otakudesu.best';
+import { fetchPath } from '../lib/mirrorClient.js';
+
 const genreLists = async () => {
-    const response = await axios.get(`${BASEURL}/genre-list`);
-    const result = scrapeGenreLists(response.data);
+    const html = await fetchPath('/genre-list');
+    const result = scrapeGenreLists(html);
     return result;
 };
 export default genreLists;

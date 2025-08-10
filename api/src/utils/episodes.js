@@ -1,8 +1,7 @@
-import axios from 'axios';
 import scrapeAnimeEpisodes from '../lib/scrapeAnimeEpisodes.js';
-const BASEURL = process.env.BASEURL   || 'https://otakudesu.best';
+import { fetchPath } from '../lib/mirrorClient.js';
 const episodes = async (slug) => {
-    const { data } = await axios.get(`${BASEURL}/anime/${slug}`);
+    const data = await fetchPath(`/anime/${slug}`);
     const result = scrapeAnimeEpisodes(data);
     return result;
 };

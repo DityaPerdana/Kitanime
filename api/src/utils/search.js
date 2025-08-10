@@ -1,9 +1,7 @@
-import axios from 'axios';
 import scrapesearchresult from '../lib/scrapeSearchResult.js';
-const BASEURL = process.env.BASEURL   || 'https://otakudesu.best';
+import { fetchPath } from '../lib/mirrorClient.js';
 const search = async (keyword) => {
-    const response = await axios.get(`${BASEURL}/?s=${keyword}&post_type=anime`);
-    const html = response.data;
+    const html = await fetchPath(`/?s=${keyword}&post_type=anime`);
     const searchResult = scrapesearchresult(html);
     return searchResult;
 };

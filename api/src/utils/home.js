@@ -1,11 +1,10 @@
-import axios from 'axios';
 import { load } from 'cheerio';
 import scrapeOngoingAnime from '../lib/scapeOngoingAnime.js';
 import scrapeCompleteAnime from '../lib/scrapeCompleteAnime.js';
-const BASEURL = process.env.BASEURL   || 'https://otakudesu.best';
-console.log(BASEURL);
+import { fetchPath } from '../lib/mirrorClient.js';
+
 const home = async () => {
-    const { data } = await axios.get(BASEURL);
+    const data = await fetchPath('');
     const $ = load(data);
     const ongoingAnimeEls = $('.venutama .rseries .rapi:first .venz ul li').toString();
     const completeAnimeEls = $('.venutama .rseries .rapi:last .venz ul li').toString();
