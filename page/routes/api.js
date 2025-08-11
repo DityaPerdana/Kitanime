@@ -27,6 +27,18 @@ router.get('/anime/status', async (req, res) => {
   }
 });
 
+// Allow clearing cached base URL (useful after updating endpoint)
+router.post('/anime/reset-base', (req, res) => {
+  try {
+    if (typeof animeApi.resetBaseCache === 'function') {
+      animeApi.resetBaseCache();
+    }
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ ok: false });
+  }
+});
+
 // Root health endpoint for admin API connection test
 router.get('/', async (req, res) => {
   try {

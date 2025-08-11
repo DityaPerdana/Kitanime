@@ -10,6 +10,10 @@ class AnimeApiService {
     this._baseCache = { url: null, ts: 0 };
     this._baseTtlMs = 5 * 60 * 1000; // 5 minutes
   }
+
+  resetBaseCache() {
+    this._baseCache = { url: null, ts: 0 };
+  }
   async getApiBaseUrl() {
     // cached
     const now = Date.now();

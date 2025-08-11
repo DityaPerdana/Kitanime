@@ -10,7 +10,8 @@ const {
   updateAdSlot,
   deleteAdSlot,
   getSetting,
-  updateSetting
+  updateSetting,
+  isServerless
 } = require('../models/database');
 
 function requireAuth(req, res, next) {
@@ -126,7 +127,8 @@ router.get('/api-endpoints', requireAuth, async (req, res) => {
       title: 'Kelola API Endpoints - Admin ArufaNime',
       layout: 'admin/layout',
       user: req.session.adminUser,
-      endpoints,
+  endpoints,
+  isServerless,
       req: req
     });
   } catch (error) {

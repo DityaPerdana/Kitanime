@@ -6,8 +6,11 @@ block content
       div
         h2(class="text-xl font-semibold text-white") Kelola API Endpoints
         p(class="text-white/70 mt-1") Atur URL API untuk mengambil data anime
-      
-      button(onclick="showAddModal()" class="bg-primary-600 text-neutral-100 px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium") Tambah Endpoint
+        if isServerless
+          p(class="text-xs text-amber-300 mt-2") Catatan: Mode serverless (Vercel) membaca konfigurasi secara read-only. Ubah URL API via file endpoint.json atau variabel lingkungan pada deploy.
+
+      if !isServerless
+        button(onclick="showAddModal()" class="bg-primary-600 text-neutral-100 px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium") Tambah Endpoint
 
     div(class="bg-neutral-900 border border-neutral-800 rounded-lg shadow overflow-hidden")
       div(class="px-6 py-4 border-b border-neutral-800")
@@ -30,8 +33,11 @@ block content
                   p(class="text-xs text-neutral-400 mt-1") Dibuat: #{new Date(endpoint.created_at).toLocaleDateString('id-ID')}
                 
                 div(class="flex items-center space-x-2")
-                  button(onclick=`editEndpoint(${endpoint.id}, '${endpoint.name}', '${endpoint.url}', ${endpoint.is_active})` class="text-primary-400 hover:text-primary-300 font-medium text-sm") Edit
-                  button(onclick=`deleteEndpoint(${endpoint.id})` class="text-red-500 hover:text-red-400 font-medium text-sm") Hapus
+                  if !isServerless
+                    button(onclick=`editEndpoint(${endpoint.id}, '${endpoint.name}', '${endpoint.url}', ${endpoint.is_active})` class="text-primary-400 hover:text-primary-300 font-medium text-sm") Edit
+                    button(onclick=`deleteEndpoint(${endpoint.id})` class="text-red-500 hover:text-red-400 font-medium text-sm") Hapus
+                  else
+                    span(class="text-xs text-neutral-400") Konfigurasi dikunci di serverless
 
       else
         div(class="px-6 py-8 text-center")
@@ -128,15 +134,23 @@ block scripts
       statusEl.className = 'text-sm text-neutral-300';
 
       try {
-        const response = await fetch('/api/');
-        const data = await response.json();
-        
-        if (data.success) {
+        let response = await fetch('/api/');
+        let data = await response.json();
+
+        if (!data.success) {
+          // coba fallback status endpoint
+          response = await fetch('/api/anime/status');
+          data = await response.json();
+          if (response.ok && (data.online === true)) {
+            statusEl.textContent = 'Koneksi berhasil!';
+            statusEl.className = 'text-sm text-green-400';
+          } else {
+            statusEl.textContent = 'Koneksi gagal: ' + (data.error || 'Unknown error');
+            statusEl.className = 'text-sm text-red-400';
+          }
+        } else {
           statusEl.textContent = 'Koneksi berhasil!';
           statusEl.className = 'text-sm text-green-400';
-        } else {
-          statusEl.textContent = 'Koneksi gagal: ' + (data.error || 'Unknown error');
-          statusEl.className = 'text-sm text-red-400';
         }
       } catch (error) {
         statusEl.textContent = 'Koneksi gagal: ' + error.message;
