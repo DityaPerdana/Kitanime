@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const isServerless = process.env.VERCEL === '1';
 
@@ -84,7 +84,7 @@ async function insertDefaultData() {
       }
     });
 
-    db.get("SELECT COUNT(*) as count FROM admin_users", async (err, row) => {
+  db.get("SELECT COUNT(*) as count FROM admin_users", async (err, row) => {
       if (err) {
         reject(err);
         return;
@@ -92,7 +92,7 @@ async function insertDefaultData() {
 
       if (row.count === 0) {
         try {
-          const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = bcrypt.hashSync('admin123', 10);
           db.run(`INSERT INTO admin_users (username, password_hash, email) VALUES
             ('admin', ?, 'admin@arufanime.com')`, [hashedPassword]);
         } catch (error) {

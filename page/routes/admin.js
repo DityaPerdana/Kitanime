@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 const {
   getAdminByUsername,
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
       return res.redirect('/admin/login?error=invalid_credentials');
     }
 
-    const isValidPassword = await bcrypt.compare(password, admin.password_hash);
+  const isValidPassword = bcrypt.compareSync(password, admin.password_hash);
     if (!isValidPassword) {
       return res.redirect('/admin/login?error=invalid_credentials');
     }
