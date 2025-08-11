@@ -7,43 +7,82 @@ class AnimeApiService {
   constructor() {
     this.fallbackEndpointsPath = path.join(__dirname, '..', 'endpoint.json');
     this.apiResponsesPath = path.join(__dirname, '..', 'apiResponse');
+    this._baseCache = { url: null, ts: 0 };
+    this._baseTtlMs = 5 * 60 * 1000; // 5 minutes
   }
   async getApiBaseUrl() {
-    try {
-      // 1) ENV override first
-      const envUrl = process.env.EXTERNAL_API_BASE_URL || process.env.API_BASE_URL;
-      if (envUrl) return envUrl;
+    // cached
+    const now = Date.now();
+    if (this._baseCache.url && (now - this._baseCache.ts) < this._baseTtlMs) {
+      return this._baseCache.url;
+    }
+    const tried = new Set();
+    const candidates = await this._getCandidates();
+    for (const url of candidates) {
+      if (!url || tried.has(url)) continue;
+      tried.add(url);
+      const ok = await this._ping(url);
+      if (ok) {
+        this._baseCache = { url, ts: now };
+        return url;
+      }
+    }
+    // fallback to first candidate or default
+    const fallback = candidates[0] || 'https://arufanime-apis.vercel.app/v1';
+    this._baseCache = { url: fallback, ts: now };
+    return fallback;
+  }
 
-      // 2) DB value — allow localhost in non-production (or if explicitly allowed)
+  async _getCandidates() {
+    const list = [];
+    const push = (u) => { if (u && !list.includes(u)) list.push(u.replace(/\/$/, '')); };
+    try { push(process.env.EXTERNAL_API_BASE_URL || process.env.API_BASE_URL); } catch {}
+
+    // Same-origin on Vercel (monorepo): https://<vercel-url>/v1
+    if (process.env.VERCEL_URL) {
+      push(`https://${process.env.VERCEL_URL}/v1`);
+    }
+
+    try {
       const dbUrl = await getActiveApiEndpoint();
       if (dbUrl) {
         const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?(\/|$)/i.test(dbUrl);
         const allowLocal = process.env.ALLOW_LOCAL_API === '1' || process.env.NODE_ENV !== 'production';
-        if (!isLocal || allowLocal) {
-          return dbUrl;
-        }
+        if (!isLocal || allowLocal) push(dbUrl);
       }
+    } catch {}
 
-      // 3) Fallback file
-      try {
-        const endpointData = await fs.readFile(this.fallbackEndpointsPath, 'utf8');
-        const endpoints = JSON.parse(endpointData);
-        if (endpoints.base_url) return endpoints.base_url;
-      } catch {
-        // ignore
+    try {
+      const endpointData = await fs.readFile(this.fallbackEndpointsPath, 'utf8');
+      const endpoints = JSON.parse(endpointData);
+      push(endpoints.base_url);
+    } catch {}
+
+    // default public API
+    push('https://arufanime-apis.vercel.app/v1');
+    return list;
+  }
+
+  async _ping(baseUrl) {
+    try {
+      const base = baseUrl.replace(/\/$/, '');
+      // Try fast health endpoints
+      const candidates = [`${base}/`, `${base}/home`];
+      for (const url of candidates) {
+        try {
+          const res = await axios.get(url, { timeout: 2500, headers: { 'User-Agent': 'ArufaNime/1.0' } });
+          if (res.status === 200) return true;
+        } catch {}
       }
-
-      // 4) Public default
-      return 'https://arufanime-apis.vercel.app/v1';
-    } catch (error) {
-      console.error('Error getting API base URL:', error);
-      return 'https://arufanime-apis.vercel.app/v1';
+      return false;
+    } catch {
+      return false;
     }
   }
 
   async makeRequest(endpoint, params = {}) {
     try {
-      const baseUrl = await this.getApiBaseUrl();
+      let baseUrl = await this.getApiBaseUrl();
       const isAsset = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map)$/i.test(endpoint);
       if (isAsset) throw Object.assign(new Error('Skip asset proxy'), { skip: true });
 
@@ -52,11 +91,26 @@ class AnimeApiService {
         url = `${baseUrl}/ongoing-anime/${params.page}`;
       }
 
-      const response = await axios.get(url, {
-        params,
-        timeout: 10000,
-        headers: { 'User-Agent': 'ArufaNime/1.0' }
-      });
+      const doGet = async (u) => axios.get(u, { params, timeout: 10000, headers: { 'User-Agent': 'ArufaNime/1.0' } });
+
+      let response;
+      try {
+        response = await doGet(url);
+      } catch (e1) {
+        // try other bases before mock
+        const candidates = await this._getCandidates();
+        for (const cand of candidates) {
+          if (!cand || cand === baseUrl) continue;
+          const newUrl = endpoint === '/ongoing-anime' ? `${cand}/ongoing-anime/${params.page}` : `${cand}${endpoint}`;
+          try {
+            response = await doGet(newUrl);
+            baseUrl = cand;
+            this._baseCache = { url: cand, ts: Date.now() };
+            break;
+          } catch {}
+        }
+        if (!response) throw e1;
+      }
 
       if (response.data && response.data.status === 'Ok') {
         if (endpoint === '/ongoing-anime' || endpoint.includes('/complete-anime') || endpoint.includes('/search') || endpoint.includes('/movies') || (response.data.anime && response.data.pagination)) {
@@ -68,8 +122,9 @@ class AnimeApiService {
     } catch (error) {
       // Respect 404: jangan fallback ke mock untuk detail endpoints
       const status = error?.response?.status;
-      const isKnown = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//, /^\/anime\//, /^\/episode\//].some(r => r.test(endpoint));
-      const allowMock = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//].some(r => r.test(endpoint));
+  const isKnown = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//, /^\/anime\//, /^\/episode\//].some(r => r.test(endpoint));
+  // Never use mock for /anime/* and /episode/* to ensure slug-specific pages are real only
+  const allowMock = [/^\/home$/, /^\/ongoing-anime/, /^\/complete-anime/, /^\/genres(\/|$)/, /^\/search\//, /^\/movies\//].some(r => r.test(endpoint));
       if (error?.skip) return null;
       if (status === 404) return null;
       if (!isKnown) return null;

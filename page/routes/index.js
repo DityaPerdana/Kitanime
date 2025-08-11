@@ -8,15 +8,32 @@ const qs = require('qs');
 const request = require('request');
 router.get('/', async (req, res) => {
   try {
-    const homeData = await animeApi.getHomeData();
     const siteTitle = await getSetting('site_title') || 'ArufaNime - Streaming Anime Subtitle Indonesia';
     const siteDescription = await getSetting('site_description') || 'Nonton anime subtitle Indonesia terlengkap dan terbaru';
-    
+
+    let homeData = await animeApi.getHomeData();
+    let ongoingAnime = homeData?.ongoing_anime || [];
+    let completeAnime = homeData?.complete_anime || [];
+
+    // Fallback: if /home unavailable or empty, fetch from dedicated endpoints
+    if (!ongoingAnime.length || !completeAnime.length) {
+      const [ongoingData, completeData] = await Promise.all([
+        animeApi.getOngoingAnime(1).catch(() => null),
+        animeApi.getCompleteAnime(1).catch(() => null)
+      ]);
+      if (!ongoingAnime.length) {
+        ongoingAnime = ongoingData?.data || ongoingData?.ongoing_anime || [];
+      }
+      if (!completeAnime.length) {
+        completeAnime = completeData?.data || completeData?.complete_anime || [];
+      }
+    }
+
     res.render('index', {
       title: siteTitle,
       description: siteDescription,
-      ongoingAnime: homeData?.ongoing_anime || [],
-      completeAnime: homeData?.complete_anime || [],
+      ongoingAnime,
+      completeAnime,
       currentPage: 'home'
     });
   } catch (error) {

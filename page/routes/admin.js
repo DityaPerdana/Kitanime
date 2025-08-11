@@ -51,13 +51,30 @@ router.post('/login', async (req, res) => {
       return res.redirect('/admin/login?error=invalid_credentials');
     }
 
-    req.session.adminUser = {
-      id: admin.id,
-      username: admin.username,
-      email: admin.email
+    const setUserAndRedirect = () => {
+      req.session.adminUser = {
+        id: admin.id,
+        username: admin.username,
+        email: admin.email
+      };
+      if (typeof req.session.save === 'function') {
+        req.session.save(() => res.redirect('/admin'));
+      } else {
+        res.redirect('/admin');
+      }
     };
 
-    res.redirect('/admin');
+    if (typeof req.session.regenerate === 'function') {
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error('Session regenerate error:', err);
+          return res.redirect('/admin/login?error=session_error');
+        }
+        setUserAndRedirect();
+      });
+    } else {
+      setUserAndRedirect();
+    }
   } catch (error) {
     console.error('Admin login error:', error);
     res.redirect('/admin/login?error=server_error');

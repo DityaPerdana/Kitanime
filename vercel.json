@@ -3,6 +3,11 @@
   "installCommand": "npm install --prefix api && npm install --prefix page",
   "builds": [
     {
+      "src": "api/index.js",
+      "use": "@vercel/node@3.0.7",
+      "config": { "includeFiles": ["api/**/**"] }
+    },
+    {
       "src": "page/app.js",
       "use": "@vercel/node@3.0.7",
       "config": {

@@ -1,5 +1,5 @@
 {
-  "base_url": "https://arufanime-apis.vercel.app/v1",
+  "base_url": "https://edxzqfglrrbg.ap-southeast-1.clawcloudrun.com/v1",
   "endpoints": {
     "home": "/home",
     "ongoing_anime": "/ongoing-anime",
