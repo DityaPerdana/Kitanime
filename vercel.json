@@ -1,14 +1,25 @@
 {
   "version": 2,
-  "installCommand": "cd api && npm install",
+  "installCommand": "npm install --prefix api && npm install --prefix page",
   "builds": [
     {
-      "src": "api/index.js",
+      "src": "page/app.js",
       "use": "@vercel/node@3.0.7",
-      "config": { "includeFiles": ["api/**/**"] }
+      "config": {
+        "includeFiles": [
+          "page/views/**",
+          "page/public/**",
+          "page/data/**",
+          "page/routes/**",
+          "page/middleware/**",
+          "page/services/**",
+          "page/models/**"
+        ]
+      }
     }
   ],
   "routes": [
-    { "src": "^\/(api|v1)(?:\/.*)?$", "dest": "/api/index.js" }
+    { "src": "^\/(api|v1)(?:\/.*)?$", "dest": "/api/index.js" },
+    { "src": "^(?!\/(api|v1))(.*)", "dest": "/page/app.js" }
   ]
 }

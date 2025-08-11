@@ -2,9 +2,12 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
 
+const isServerless = process.env.VERCEL === '1';
+
 const dbPath = path.join(__dirname, '..', 'data', 'kitanime.db');
 
-const db = new sqlite3.Database(dbPath, (err) => {
+// In Vercel serverless, filesystem is read-only at runtime. Open DB in read-only mode if present.
+const db = new sqlite3.Database(dbPath, isServerless ? sqlite3.OPEN_READONLY : sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
@@ -13,6 +16,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 async function initializeDatabase() {
+  // Skip schema writes on serverless to avoid write errors
+  if (isServerless) {
+    return Promise.resolve();
+  }
   return new Promise((resolve, reject) => {
     db.serialize(() => {
 
@@ -243,5 +250,6 @@ const dbHelpers = {
 
 module.exports = {
   initializeDatabase,
+  isServerless,
   ...dbHelpers
 };

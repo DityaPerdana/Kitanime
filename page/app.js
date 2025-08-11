@@ -17,7 +17,7 @@ const cookieConsent = require('./middleware/cookieConsent');
 const adSlots = require('./middleware/adSlots');
 const maintenance = require('./middleware/maintenance');
 
-const { initializeDatabase } = require('./models/database');
+const { initializeDatabase, isServerless } = require('./models/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -168,21 +168,27 @@ app.use((err, req, res, next) => {
   });
 });
 
-async function startServer() {
+async function bootstrap() {
   try {
+    // Skip heavy init on serverless cold starts if not necessary
     await initializeDatabase();
     console.log('Database initialized successfully');
-    
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+  }
+}
+
+// Only listen locally; on Vercel we export the app
+if (process.env.VERCEL !== '1') {
+  bootstrap().then(() => {
     app.listen(PORT, () => {
       console.log(`ArufaNime server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
+  });
+} else {
+  // Pre-initialize for serverless function
+  bootstrap();
 }
-
-startServer();
 
 module.exports = app;
