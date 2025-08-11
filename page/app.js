@@ -19,6 +19,7 @@ const maintenance = require('./middleware/maintenance');
 
 const { initializeDatabase, isServerless } = require('./models/database');
 
+const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -117,7 +118,23 @@ app.get('/proxy', (req, res) => {
     .pipe(res);
 });
 
-app.set('views', path.join(__dirname, 'views'));
+function pickFirstExisting(paths) {
+  for (const p of paths) {
+    try {
+      if (fs.existsSync(p)) return p;
+    } catch {}
+  }
+  return paths[0];
+}
+
+const viewsDir = pickFirstExisting([
+  path.join(__dirname, 'views'),
+  // When includeFiles keeps folder prefix "page/"
+  path.join(process.cwd(), 'page', 'views'),
+  // When includeFiles strips prefix
+  path.join(process.cwd(), 'views')
+]);
+app.set('views', viewsDir);
 app.set('view engine', 'pug');
 
 app.use(express.json({ limit: '10mb' }));
@@ -135,7 +152,12 @@ app.use(session({
   }
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+const publicDir = pickFirstExisting([
+  path.join(__dirname, 'public'),
+  path.join(process.cwd(), 'page', 'public'),
+  path.join(process.cwd(), 'public')
+]);
+app.use(express.static(publicDir));
 
 app.use(cookieConsent);
 app.use(adSlots);

@@ -13,7 +13,9 @@
           "page/routes/**",
           "page/middleware/**",
           "page/services/**",
-          "page/models/**"
+          "page/models/**",
+          "page/endpoint.json",
+          "page/apiResponse/**"
         ]
       }
     }
