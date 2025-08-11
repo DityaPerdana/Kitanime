@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "installCommand": "npm install",
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node@3.0.7",
+      "config": {
+        "includeFiles": [
+          "views/**",
+          "public/**",
+          "data/**",
+          "routes/**",
+          "middleware/**",
+          "services/**",
+          "models/**",
+          "endpoint.json",
+          "apiResponse/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/app.js" }
+  ]
+}

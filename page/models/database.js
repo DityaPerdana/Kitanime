@@ -9,7 +9,8 @@ const dbPath = path.join(__dirname, '..', 'data', 'kitanime.db');
 // In Vercel serverless, filesystem is read-only at runtime. Open DB in read-only mode if present.
 const db = new sqlite3.Database(dbPath, isServerless ? sqlite3.OPEN_READONLY : sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
   if (err) {
-    console.error('Error opening database:', err.message);
+  // On serverless, DB may be absent; log but continue
+  console.error('Error opening database:', err.message);
   } else {
     console.log('Connected to SQLite database');
   }
