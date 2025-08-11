@@ -393,7 +393,28 @@ CMD ["npm", "start"]
 ```
 
 
-## 🔄 Fitur yang Akan Datang
+## � Update Server (ClawCloud)
+
+Setelah Anda melakukan perubahan kode dan push ke GitHub, ada dua cara mudah untuk menerapkan update di server ClawCloud:
+
+1) Jalankan langsung index.js (tanpa auto-pull)
+- Command: node
+- Arguments: /app/Kitanime/api/index.js
+- Kapan dipakai: Jika Anda sudah masuk ke pod dan melakukan git pull serta npm install secara manual.
+
+2) Pakai boot script entry.sh (auto-pull + start)
+- Command: /bin/sh
+- Arguments: /app/Kitanime/entry.sh
+- Kapan dipakai: Ingin setiap restart otomatis menarik kode terbaru dari origin/main, install dependency, lalu start API.
+
+Catatan penting
+- Pastikan repo ini di-clone ke /app/Kitanime di dalam pod (volume /app harus aktif) dan kredensial git sudah siap untuk fetch/pull.
+- Set environment variables di ClawCloud: NODE_ENV=production, PORT=3000, BASEURL=<mirror otakudesu>, SCRAPER_TIMEOUT_MS=15000.
+- Health Check: Path /v1, Port 3000, Public Access ON.
+- Setelah mengubah Command/Arguments, lakukan Deploy/Restart dari UI ClawCloud agar perubahan diterapkan.
+
+
+## �🔄 Fitur yang Akan Datang
 
 - 📱 **Mobile App**: Aplikasi Android dan iOS native
 - 🔔 **Push Notifications**: Notifikasi episode baru
